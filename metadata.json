@@ -1,0 +1,6 @@
+{
+  "name": "霓虹彈射：極限打磚塊",
+  "description": "經典復古街機風格的打磚塊遊戲，具備多樣磚塊、豐富道具掉落、連續連擊加成、炫彩粒子特效與合成音效。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

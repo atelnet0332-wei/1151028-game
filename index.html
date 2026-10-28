@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>霓虹彈射：極限打磚塊</title>
+    <meta name="description" content="經典復古街機風格的打磚塊遊戲，具備多樣磚塊、豐富道具掉落、連續連擊加成、炫彩粒子特效與合成音效。" />
+    <meta property="og:title" content="霓虹彈射：極限打磚塊" />
+    <meta property="og:description" content="經典復古街機風格的打磚塊遊戲，具備多樣磚塊、豐富道具掉落、連續連擊加成、炫彩粒子特效與合成音效。" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body data-state="title">
+    <div class="game-shell">
+      <!-- 頂部 HUD (高頻監控數據) -->
+      <header class="hud-bar">
+        <div class="hud-left">
+          <div class="hud-stat">
+            <span class="hud-label">得分 SCORE</span>
+            <span id="hud-score" class="hud-value">0</span>
+          </div>
+          <div class="hud-stat">
+            <span class="hud-label">最高分 BEST</span>
+            <span id="hud-highscore" class="hud-value">0</span>
+          </div>
+          <div id="hud-combo" class="combo-badge">COMBO x0</div>
+        </div>
+
+        <div class="hud-center">
+          <div class="hud-stat" style="align-items: center;">
+            <span class="hud-label">關卡 STAGE</span>
+            <span id="hud-level" class="hud-value">1 / 5</span>
+          </div>
+          <div id="hud-powerups" class="powerup-pill"></div>
+        </div>
+
+        <div class="hud-right">
+          <div class="hud-stat" style="align-items: flex-end;">
+            <span class="hud-label">生命 LIVES</span>
+            <span id="hud-lives" class="hud-lives">❤️❤️❤️</span>
+          </div>
+          <button id="btn-sound" class="icon-btn" aria-label="切換靜音" tabindex="-1">
+            <span class="sound-icon">🔊</span>
+          </button>
+          <button id="btn-pause" class="icon-btn" aria-label="暫停遊戲" tabindex="-1">
+            <span>⏸️</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 關卡標題浮水印 -->
+      <div id="level-name-banner" class="level-banner"></div>
+
+      <!-- 遊戲主要畫布視窗 -->
+      <main class="canvas-wrapper">
+        <canvas id="game-canvas" width="800" height="600" tabindex="0" aria-label="打磚塊遊戲畫布"></canvas>
+      </main>
+
+      <!-- 行動端虛擬按鈕 -->
+      <div class="mobile-controls" aria-label="行動控制面板">
+        <div class="mobile-dpad">
+          <button id="mobile-left" class="mobile-btn" aria-label="向左移動">◀</button>
+          <button id="mobile-right" class="mobile-btn" aria-label="向右移動">▶</button>
+        </div>
+        <button id="mobile-fire" class="mobile-btn-action" aria-label="發射球或雷射">發射/雷射</button>
+      </div>
+
+      <!-- 標題畫面視窗 (Title Modal) -->
+      <div id="modal-title" class="modal-overlay">
+        <div class="modal-card">
+          <svg class="title-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" stroke="#00f0ff" stroke-width="3" fill="rgba(0, 240, 255, 0.1)"/>
+            <rect x="25" y="35" width="50" height="10" rx="3" fill="#ff007f" />
+            <circle cx="50" cy="55" r="7" fill="#00f0ff" />
+            <rect x="30" y="70" width="40" height="6" rx="2" fill="#ffd700" />
+          </svg>
+
+          <div>
+            <h1 class="game-title">霓虹彈射</h1>
+            <p class="game-subtitle">NEON BREAKOUT · 街機極限打磚塊</p>
+          </div>
+
+          <div class="features-grid">
+            <div class="feature-box">
+              <span class="feat-icon">💥</span>
+              <span>TNT連鎖爆破</span>
+            </div>
+            <div class="feature-box">
+              <span class="feat-icon">⚡</span>
+              <span>雙聯雷射主砲</span>
+            </div>
+            <div class="feature-box">
+              <span class="feat-icon">🔥</span>
+              <span>烈焰貫穿神球</span>
+            </div>
+          </div>
+
+          <div class="controls-hint">
+            <div class="control-line">
+              <span>移動球拍</span>
+              <div>
+                <span class="key-badge">滑鼠滑動</span>
+                <span class="key-badge">← / →</span>
+                <span class="key-badge">A / D</span>
+              </div>
+            </div>
+            <div class="control-line">
+              <span>發射球 / 射擊雷射</span>
+              <div>
+                <span class="key-badge">空白鍵 Space</span>
+                <span class="key-badge">滑鼠左鍵</span>
+              </div>
+            </div>
+            <div class="control-line">
+              <span>暫停 / 靜音</span>
+              <div>
+                <span class="key-badge">P / Esc</span>
+                <span class="key-badge">M 鍵</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-start" class="primary-btn" data-start="true">開始遊戲 START</button>
+        </div>
+      </div>
+
+      <!-- 暫停畫面視窗 (Pause Modal) -->
+      <div id="modal-pause" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+          <h2 class="game-title" style="font-size: 26px;">遊戲暫停 PAUSED</h2>
+          <p class="game-subtitle">深呼吸，調整節奏再戰！</p>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+            <button id="btn-resume" class="primary-btn" data-start="true">繼續遊戲 RESUME</button>
+            <button id="btn-restart" class="secondary-btn">重新開始 RESTART</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 結算畫面視窗 (Game Over / Stage Clear Modal) -->
+      <div id="modal-gameover" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+          <h2 id="gameover-title-text" class="game-title" style="font-size: 26px;">關卡達成！STAGE CLEAR</h2>
+
+          <div class="stats-tiles">
+            <div class="tile">
+              <div class="tile-label">最終得分</div>
+              <div id="final-score" class="tile-value">0</div>
+            </div>
+            <div class="tile">
+              <div class="tile-label">通關進度</div>
+              <div id="final-level" class="tile-value">1</div>
+            </div>
+            <div class="tile">
+              <div class="tile-label">最高連擊</div>
+              <div id="final-combo" class="tile-value">0</div>
+            </div>
+          </div>
+
+          <button id="btn-gameover-restart" class="primary-btn" data-start="true">進入下一關 (Next Stage)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 純 JavaScript 模組腳本 (無 React，無 TypeScript) -->
+    <script type="module" src="/src/game.js"></script>
+  </body>
+</html>

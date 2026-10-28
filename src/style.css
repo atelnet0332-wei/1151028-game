@@ -1,0 +1,463 @@
+/**
+ * @file style.css
+ * 霓虹街機風格遊戲界面與響應式排版
+ */
+
+:root {
+  --bg-deep: #060714;
+  --panel-bg: rgba(14, 18, 38, 0.94);
+  --border-cyan: #00f0ff;
+  --glow-cyan: rgba(0, 240, 255, 0.5);
+  --accent-pink: #ff007f;
+  --accent-gold: #ffd700;
+  --text-main: #f0f4fc;
+  --text-dim: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+  touch-action: manipulation;
+}
+
+/* 遊戲主容器 */
+.game-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 30%, #101533 0%, #060714 85%);
+}
+
+/* 頂部 HUD */
+.hud-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: linear-gradient(180deg, rgba(6, 7, 20, 0.95) 0%, rgba(6, 7, 20, 0) 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-left, .hud-center, .hud-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.hud-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px var(--glow-cyan);
+}
+
+.hud-lives {
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.combo-badge {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--accent-pink);
+  text-shadow: 0 0 12px rgba(255, 0, 127, 0.8);
+  transition: opacity 0.2s ease, transform 0.15s ease;
+  opacity: 0;
+}
+
+.powerup-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid var(--accent-gold);
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: none;
+}
+
+/* 頂部小圖示按鈕 */
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(14, 18, 38, 0.8);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.icon-btn:hover {
+  border-color: var(--border-cyan);
+  box-shadow: 0 0 10px var(--glow-cyan);
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+/* 畫布視窗 */
+.canvas-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-width: 960px;
+  max-height: 720px;
+  padding: 12px;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  max-width: 800px;
+  max-height: 600px;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 0, 0, 0.6);
+  background-color: #080918;
+  outline: none;
+}
+
+/* 關卡名稱淡入淡出 Banner */
+.level-banner {
+  position: absolute;
+  top: 90px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--border-cyan);
+  text-shadow: 0 0 15px var(--glow-cyan);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+}
+
+.fade-banner {
+  animation: bannerFade 2.6s forwards;
+}
+
+@keyframes bannerFade {
+  0% { opacity: 0; transform: translateY(-10px) scale(0.9); }
+  20% { opacity: 1; transform: translateY(0) scale(1); }
+  75% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(10px) scale(1.05); }
+}
+
+/* 模態視窗與覆蓋層 (無 backdrop-filter blur 以防卡頓) */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 5, 14, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--panel-bg);
+  border: 2px solid var(--border-cyan);
+  border-radius: 12px;
+  box-shadow: 0 0 35px var(--glow-cyan);
+  padding: 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.title-logo-svg {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  filter: drop-shadow(0 0 14px var(--border-cyan));
+}
+
+.game-title {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #ffffff;
+  text-shadow: 0 0 15px var(--border-cyan), 0 0 30px rgba(0, 240, 255, 0.4);
+}
+
+.game-subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* 遊戲特色提示條 */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.feature-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 6px;
+  font-size: 12px;
+}
+
+.feature-box .feat-icon {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* 控制指南 */
+.controls-hint {
+  font-size: 13px;
+  color: var(--text-dim);
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.control-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.key-badge {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 主要 CTA 按鈕 */
+.primary-btn {
+  background: linear-gradient(135deg, #00f0ff 0%, #0077ff 100%);
+  color: #030816;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 28px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.85);
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
+.secondary-btn {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  border-color: var(--border-cyan);
+  color: var(--border-cyan);
+}
+
+/* 結算面板數據欄 */
+.stats-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.tile {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.tile-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.tile-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 行動端虛擬按鍵 */
+.mobile-controls {
+  display: none;
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  padding: 0 24px;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.mobile-dpad {
+  display: flex;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+.mobile-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: rgba(14, 18, 38, 0.75);
+  border: 2px solid rgba(0, 240, 255, 0.4);
+  color: var(--border-cyan);
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.mobile-btn-action {
+  width: 78px;
+  height: 64px;
+  border-radius: 12px;
+  background: rgba(255, 0, 127, 0.25);
+  border: 2px solid var(--accent-pink);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  pointer-events: auto;
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+}
+
+.mobile-btn:active, .mobile-btn-action:active {
+  transform: scale(0.92);
+}
+
+/* 在觸控螢幕或寬度較小時顯示行動控制器 */
+@media (max-width: 768px), (pointer: coarse) {
+  .mobile-controls {
+    display: flex;
+  }
+  .hud-bar {
+    padding: 0 10px;
+    height: 54px;
+  }
+  .hud-left, .hud-center, .hud-right {
+    gap: 8px;
+  }
+  .hud-label {
+    font-size: 8px;
+    letter-spacing: 0.8px;
+  }
+  .hud-value {
+    font-size: 16px;
+  }
+  .hud-lives {
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+  .modal-card {
+    padding: 20px 16px;
+    gap: 14px;
+    max-width: 340px;
+  }
+  .game-title {
+    font-size: 24px;
+  }
+  .features-grid {
+    gap: 6px;
+  }
+  .feature-box {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  .canvas-wrapper {
+    padding-top: 60px;
+    padding-bottom: 84px;
+  }
+}
